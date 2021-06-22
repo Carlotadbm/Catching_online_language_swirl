@@ -1,0 +1,251 @@
+- Class: meta
+  Course: Catching online language
+  Lesson: Reading WhatsApp chats
+  Author: Carlota de Benito Moreno
+  Type: Standard
+  Organization: University of Zurich
+  Version: 2.4.5
+
+- Class: text
+  Output: >
+    Hi there! Welcome to this lesson where we'll learn how to process a WhatsApp chat in R. 
+    We'll use the library `tidyverse` - I have loaded it for you. Remember that you can install a new 
+    library with the function install.packages("library_name") and load it with the function 
+    library(library_name).
+    
+- Class: text
+  Output: >
+    I recommend that you work on an RStudio script. Go to File > New File > RScript and write your
+    solutions on the script. (Remember that you have to run them - the shortcut is command + enter,
+    in Mac and control + enter in Windows.) That way you can save them for later. You can 
+    write comments that help you document what you're doing: simply take notes after typing `#`.
+
+- Class: text
+  Output: >
+    WhatsApp chats (in .txt format) can be downloaded from the App by any of the participants in 
+    the chat. In this session we'll learn how to convert them into a data frame, so that we have 
+    different metadata in different columns.
+    
+- Class: text
+  Output: > 
+    In you environment you will see see one character vectors, called `wa`. This corresponds
+    to the WhatsApp chat that you'll find in the Github repository 
+    https://github.com/Carlotadbm/Catching_online_language. 
+    I recommend that you take a look at the file before you start this lesson.
+    I loaded it with the tidyverse function `read_lines()`. In order to do it by yourself,
+    you will only need to make sure that the file is in your working directory and run the
+    line `wa <- read_lines("WhatsApp_multilingual.txt")`. 
+  
+
+- Class: cmd_question
+  Output: Print `wa` to see how the chat looks like in R .
+  CorrectAnswer: wa
+  AnswerTests: omnitest(correctExpr = 'wa')
+  Hint: >
+    Simply run `wa`, no quotations needed.
+ 
+- Class: text
+  Output: >
+    WhatsApp chats have a single line for every 'speech turn' and this line starts with 
+    the date and time (separated by a space), followed by the user name (separated by ' - ')
+    and followed by the actual message (separated by ': ') The user name appears as the 
+    name the person who downloaded the chat recorded it (these are all fictitious names).
+ 
+- Class: text
+  Output: >
+    The first two lines are different than the rest: they contain the information 
+    WhatsApp gives you everytime you open a chat (about encryption) and, because this 
+    is a group, another one informing that the group was created.
+
+- Class: cmd_question
+  Output: >
+    That is, it's clear that we should be actually having several columns here. 
+    Let's create them. First thing is to transform our character vector into a tibble 
+    with `as_tibble()`. We'll be using pipes again for this, since we will be adding new 
+    functions to this code. So write the name of our vector (`wa`) followed by a pipe (`%>%`)
+    and, after that, write `as_tibble()` (with the parentheses, but empty).
+  CorrectAnswer: wa %>% as_tibble()
+  AnswerTests: omnitest(correctVal = 'wa %>% as_tibble()')
+  Hint: >
+    This is what you need to run: `wa %>% as_tibble()`
+ 
+- Class: cmd_question
+  Output: >
+    Second thing is removing those two first rows. In longer chats, where titles 
+    have been changed, people have left the group, etc., those lines we'll be quite 
+    bothersome, because they follow a different pattern than the one messages follow 
+    and they can be anywhere. We'll need to find a way of removing them, regex can help 
+    there. But right now, let's simply remove those first rows with the function `slice()`.
+    Add it to your code above after a new pipe. Its single argument should be a negative
+    vector that contains lines 1 and 2: `-c(1:2)`
+  CorrectAnswer: wa %>% as_tibble() %>% slice(-c(1:2))
+  AnswerTests: omnitest(correctExpr='wa %>% as_tibble() %>% slice(-c(1:2))')
+  Hint: >
+    Remember that you'll have to use the `-` sign for removing lines.
+  
+- Class: cmd_question
+  Output: >
+    Now we can separate the text into columns (with `separate()`). As you can see, the 
+    single column we have right now is called `value`, let's separate it into `time` and 
+    `text` using the separator ' - '. Its first argument is `value` (with no quotation
+    marks). Its second argument is called `into`. Its value is a vector with the name of 
+    both columns: `c("time", "text")`. The last argument is called `sep` and its value
+    is the following: " - " (with quotation marks). Add it to your code with a new pipe.
+  CorrectAnswer: wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ")
+  AnswerTests: omnitest(correctExpr='wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ")')
+  Hint: >
+    The arguments you need in `separate()` are the column that you want to split, 
+    the argument `into`, which takes a character vector with the names of the two new 
+    columns, and the argument `sep`, which takes a string with the character sequence 
+    you want to be used as the border between columns.
+
+- Class: cmd_question
+  Output: >
+    We need to perform another `separate()`. Split `time` into `date` and `time` 
+    using the separator ' '. Add it to your code with a new pipe.
+  CorrectAnswer: wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ") %>% separate(time, into = c("date", "time"), sep = " ")
+  AnswerTests: omnitest(correctExpr='wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ") %>% separate(time, into = c("date", "time"), sep = " ")')
+  Hint: >
+    The line you need is quite similar to the previous one, but adapting all values.
+    
+- Class: cmd_question
+  Output: >
+    We still need to perform another `separate()`. Split `text` into `user` and `text` 
+    using the separator ': '. Because there might be more colons in each line, we'll add
+    a last argument called  `extra` - set it to "merge" (with quotation marks).
+    Add it to your code with a new pipe.
+  CorrectAnswer: >
+    wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ") %>% separate(time, into = c("date", "time"), sep = " ") %>% separate(text, into = c("user", "text"), sep = ": ", extra = "merge")
+  AnswerTests: >
+    omnitest(correctExpr='wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ") %>% separate(time, into = c("date", "time"), sep = " ") %>% separate(text, into = c("user", "text"), sep = ": ", extra = "merge")')
+  Hint: >
+    The line you need is quite similar to the previous one, but adapting all values and 
+    adding the new `merge` argument (as the last argument, please).
+
+- Class: cmd_question
+  Output: Now that the tibble looks like we want it to, let's save it to `wa_df`.
+  CorrectAnswer: >
+    wa_df <- wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ") %>% separate(time, into = c("date", "time"), sep = " ") %>% separate(text, into = c("user", "text"), sep = ": ", extra = "merge")
+  AnswerTests: >
+    omnitest(correctExpr='wa_df <- wa %>% as_tibble() %>% slice(-c(1:2)) %>% separate(value, into = c("time", "text"), sep = " - ") %>% separate(time, into = c("date", "time"), sep = " ") %>% separate(text, into = c("user", "text"), sep = ": ", extra = "merge")')
+  Hint: Just assign it the new name using the `<-` operator.
+
+- Class: text
+  Output: >
+    Let's now replace user names with anonymous codes. (Of course, names are alredy 
+    fictitious in this dataset, so this is just a theoretical example.) 
+    
+- Class: cmd_question
+  Output: >
+    We'll use random numbers (with 7 figures) as codes. Generating random data means that you will get 
+    different data every time you run your code, but you can avoid that by setting a seed.
+    Run the function `set.seed()` and, as its single argument, write the number 3 (with no 
+    quotation marks).
+  CorrectAnswer: set.seed(3)
+  AnswerTests: omnitest(correctExpr='set.seed(3)')
+  Hint: >
+    Simply type `set.seed(3)`.
+    
+- Class: cmd_question
+  Output: >
+    Now we need to find out which are the unique user names in our dataset. We'll do that 
+    with `distinct()`. We're going to use pipes again. Write `wa_df` and a pipe after it.
+    Now add the function `distinct()`, which simply needs the relevant column (`user`) as 
+    its argument.
+  CorrectAnswer: wa_df %>% distinct(user)
+  AnswerTests: omnitest(correctExpr='wa_df %>% distinct(user)')
+  Hint: You don't need quotations for this.
+  
+- Class: text
+  Output: >
+    Note that there are 9 distinct users in our dataset.
+    
+- Class: cmd_question
+  Output: >
+    Now we'll add a new column to this new table with random numbers for each of the users.
+    Add a new pipe to your previous code and add the function `mutate()`, which is used to 
+    create new columns. Within `mutate()`, write the name of the new column (`ID_user`, with
+    no quotation marks) followed by an equal sign (`=`). The content of the new column should
+    be the result of the function `sample()`, which takes two arguments: the numbers from which
+    it should draw the random sample (in our example, `1000000:9999999`) and how many elements
+    should the sample have (`9`). Add this function after the equal sign.
+  CorrectAnswer: wa_df %>% distinct(user) %>% mutate(ID_user = sample(1000000:9999999, 9))
+  AnswerTests: omnitest(correctExpr='wa_df %>% distinct(user) %>% mutate(ID_user = sample(1000000:9999999, 9))')
+  Hint: You don't need quotations here either. Did you separate the arguments of `sample()` by commas?
+
+- Class: cmd_question
+  Output: >
+    Let's save this new table as a new object called `users`.
+  CorrectAnswer: users <- wa_df %>% distinct(user) %>% mutate(ID_user = sample(1000000:9999999, 9))
+  AnswerTests: omnitest(correctExpr='users <- wa_df %>% distinct(user) %>% mutate(ID_user = sample(1000000:9999999, 9))')
+  Hint: Just assign it the new name using the `<-` operator.
+
+- Class: text
+  Output: >
+    Now we need to replace the user information in wa_df with the new codes. 
+    We'll do that in two steps.
+
+- Class: cmd_question
+  Output: >
+    We'll first use `full_join()`, which combines two tables by a common column (`user` in 
+    this case). Let's use a pipe again. Write the name of the tibble we want to modify
+    (`wa_df`) and a pipe after it. Add the `full_join()` function, with the argument `users`.  
+  CorrectAnswer: wa_df %>% full_join(users)
+  AnswerTests: omnitest(correctExpr='wa_df %>% full_join(users)')
+  Hint: >
+    After the pipe you need to add this: `full_join(users)`.
+    
+- Class: cmd_question
+  Output: >
+    Last we'll reorder our columns and remove the column `user`, in a single step. Add a new
+    pipe and, afterwards, add the function `select()`. The columns we want to keep are 
+    `date`, `time`, `ID_user`, `text`. Pass them in that order as arguments of `select()`.
+  CorrectAnswer: wa_df %>% full_join(users) %>% select(date, time, ID_user, text)
+  AnswerTests: omnitest(correctExpr='wa_df %>% full_join(users) %>% select(date, time, ID_user, text)')
+  Hint: >
+    Did you follow the order I said?
+    
+- Class: cmd_question
+  Output: >
+    Let's save the result. Because we simply modified the `wa_df` dataset, let's save it 
+    with this same name.
+  CorrectAnswer: wa_df <- wa_df %>% full_join(users) %>% select(date, time, ID_user, text)
+  AnswerTests: omnitest(correctExpr='wa_df <- wa_df %>% full_join(users) %>% select(date, time, ID_user, text)')
+  Hint: Just assign it the new name using the `<-` operator.
+
+- Class: cmd_question
+  Output: >
+    Last, let's save it as a .csv file. Set your working directory to the folder where you'd
+    like to save it. If you've forgotten how to do it: in RStudio, in the files tab that you have in the
+    bottom right window, navigate through your computer to find the folder where you would like to
+    save the file, click on "More" and then click on "Set as working directory". Look at the console -
+    this run the setwd() function without requiring you to type a complicated path.
+  CorrectAnswer: setwd("path")
+  AnswerTests: expr_uses_func('setwd')
+  Hint: >
+    If you can't see the "More" button, your window might be too small, try making it bigger.
+
+- Class: cmd_question
+  Output: >
+    We'll save it as a .csv file with the tidyverse function `write_delim()`. Its first 
+    argument is the name of the R object (`wa_df`, no quotations). The second argument 
+    is the name of the file, with the extension ("WhatsApp_multilingual.csv", with 
+    quotation marks). Last argument is called `delim` and it defines what column 
+    delimiters uses the .csv file. We'll use tabs, so set it to "\t" (quotation marks are
+    needed).
+  CorrectAnswer: write_delim(wa_df, "WhatsApp_multilingual.csv", delim = "\t")
+  AnswerTests: omnitest(correctExpr='write_delim(wa_df, "WhatsApp_multilingual.csv", delim = "\t")')
+  Hint: Check your use of the quotation marks!
+  
+- Class: text
+  Output: >
+    Well done! Working with Whatsapp chats might require that you familiarise yourself with data transformation. I
+    recommend you to use the tidyverse. I have a (rather long) swirl course for that that you're
+    welcome to try out. The information is on the readme file of the Github repository that you'll find 
+    here: https://github.com/Carlotadbm/Tools_for_text_analysis. So far it is work in progress, so
+    don't hesitate to contact me if you have any questions or detect that you need some extra material :)
+    every piece of feedback is welcome!
+    
+- Class: text
+  Output: >
+    But maybe take a well-deserved break now? :)
