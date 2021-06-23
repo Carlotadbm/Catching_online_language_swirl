@@ -9,4 +9,4 @@
   )
 }
 
-wa <- read_lines(file.path(.get_course_path(), "Catching_online_language", "Reading_WhatsApp_chats", "WhatsApp_multilingual.txt"))
+wa <- read_lines(file.path(.get_course_path(), "Catching_online_language_swirl", "Reading_WhatsApp_chats", "WhatsApp_multilingual.txt"))
