@@ -9,13 +9,13 @@
 - Class: text
   Output: >
     Hi there! Welcome to this lesson about the R library `rtweet`. I have loaded the library for you. Remember that you can install a new 
-    library with the function install.packages("library_name") and load it with the function 
-    library(library_name).
+    library with the function `install.packages("library_name")` and load it with the function 
+    `library(library_name)`.
   
 - Class: text
   Output: >
     I recommend that you work on an RStudio script. Go to File > New File > RScript and write your
-    solutions on the script. (Remember that you have to run them - the shortcut is command + enter,
+    solutions on the script. (Remember that you have to run them - the shortcut is command + enter
     in Mac and control + enter in Windows.) That way you can save them for later. You can 
     write comments that help you document what you're doing: simply take notes after typing `#`.
 
